@@ -1,6 +1,7 @@
-<manifest package="fr.nicopico.simpleclockwidget"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="fr.nicopico.simpleclockwidget"
     android:versionCode="1"
-    android:versionName="1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+    android:versionName="1.0" >
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -9,8 +10,15 @@
     <application
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
-        <receiver android:icon="@drawable/ic_launcher" android:name=".ClockWidget" android:label="@string/app_name" android:exported="false">
-            <meta-data android:resource="@xml/widget_provider" android:name="android.appwidget.provider"/>
+        <receiver
+            android:name=".ClockWidget"
+            android:enabled="true"
+            android:exported="false"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/app_name" >
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_provider" />
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>

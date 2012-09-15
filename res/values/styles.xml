@@ -4,17 +4,17 @@
     </style>
     
     <style name="TextBase" parent="android:style/Widget.TextView">
-		<item name="android:fontFamily">roboto</item>
-		<item name="android:textColor">@android:color/white</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:fontFamily">normal</item>
+        <item name="android:textStyle">normal</item>
+		<item name="android:singleLine">true</item>
     </style>
     
     <style name="TextBig" parent="@style/TextBase">
-        <item name="android:textSize">42dip</item>
-        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">50sp</item>
     </style>
 
     <style name="TextSmall" parent="@style/TextBase">
-        <item name="android:textSize">16dip</item>
-        <item name="android:textStyle">normal</item>
+        <item name="android:textSize">12sp</item>
     </style>
 </resources>

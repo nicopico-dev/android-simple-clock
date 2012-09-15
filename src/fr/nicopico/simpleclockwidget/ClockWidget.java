@@ -51,18 +51,25 @@ public class ClockWidget extends AppWidgetProvider {
 	}
 
 	private RemoteViews buildUpdate(Context context, int[] appWidgetIds) {
-		RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
-		
-		java.text.DateFormat timeFormat = DateFormat.getTimeFormat(context);
-		String dateFormatString = context.getString(R.string.full_wday_month_day_no_year);
+		// Adapt layout if using AM/PM format
+		RemoteViews remoteViews;
+		if (DateFormat.is24HourFormat(context)) {
+			remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout_24);
+		}
+		else {
+			remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout_12);
+		}
 		
 		Date now = new Date();
+		
+		java.text.DateFormat timeFormat = DateFormat.getTimeFormat(context);
 		String hourString = timeFormat.format(now);
-		CharSequence dateString = DateFormat.format(dateFormatString, now);
-		
+		if (hourString.length() == 4) {
+			hourString = "0" + hourString;
+		}
 		remoteViews.setTextViewText(R.id.txtHour, hourString);
-		remoteViews.setTextViewText(R.id.txtDate, dateString);
 		
+		// Display next alarm if any
 		displayNextAlarm(context, remoteViews, R.id.txtAlarm);
 		
 		// Open alarm screen on click
@@ -71,10 +78,14 @@ public class ClockWidget extends AppWidgetProvider {
 			remoteViews.setOnClickPendingIntent(R.id.widgetClock, onClickIntent);
 		}
 		
+		String dateFormatString = context.getString(R.string.date_format_all);
+		CharSequence dateString = DateFormat.format(dateFormatString, now);
+		remoteViews.setTextViewText(R.id.txtDate, dateString);
+		
 		return(remoteViews);
 	}
 	
-	private void displayNextAlarm(Context context, RemoteViews remoteViews, int textAlarmID) {
+	private boolean displayNextAlarm(Context context, RemoteViews remoteViews, int textAlarmID) {
 		String nextAlarmString = Settings.System.getString(
 				context.getContentResolver(), 
 				Settings.System.NEXT_ALARM_FORMATTED);
@@ -82,9 +93,11 @@ public class ClockWidget extends AppWidgetProvider {
         if (nextAlarmString.length() > 0) {
         	remoteViews.setViewVisibility(R.id.blockAlarm, View.VISIBLE);
         	remoteViews.setTextViewText(textAlarmID, nextAlarmString);
+        	return true;
         }
         else {
         	remoteViews.setViewVisibility(R.id.blockAlarm, View.INVISIBLE);
+        	return false;
         }
 	}
 	
