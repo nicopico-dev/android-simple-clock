@@ -11,7 +11,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.graphics.Typeface;
 import android.provider.Settings;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -20,6 +19,20 @@ import android.widget.RemoteViews;
 
 public class ClockWidget extends AppWidgetProvider {
 	private static final String TAG = ClockWidget.class.getSimpleName();
+	
+	// AlarmClock component change depending on the implementation
+	// see http://stackoverflow.com/questions/3590955/intent-to-launch-the-clock-application-on-android
+	private static final String[][] ALARM_CLOCK_IMPL = {
+		{"Standard Alarm Clock", "com.android.deskclock", "com.android.deskclock.AlarmClock"},
+		{"Nexus Alarm Clock", "com.google.android.deskclock", "com.android.deskclock.AlarmClock"},
+		{"HTC Alarm Clock", "com.htc.android.worldclock", "com.htc.android.worldclock.WorldClockTabControl" },
+        {"Moto Blur Alarm Clock", "com.motorola.blur.alarmclock",  "com.motorola.blur.alarmclock.AlarmClock"},
+        {"Samsung Galaxy Clock", "com.sec.android.app.clockpackage","com.sec.android.app.clockpackage.ClockPackage"}
+	};
+	private static final int ALARM_CLOCK_IMPL_NAME = 0;
+	private static final int ALARM_CLOCK_IMPL_PACKAGE = 1;
+	private static final int ALARM_CLOCK_IMPL_CLASS = 2;
+	
 	private static AlarmManager alarmManager = null;
 	private static PendingIntent pendingRefresh = null;
 	private static boolean checkedOpenAlarm = false;
@@ -130,17 +143,25 @@ public class ClockWidget extends AppWidgetProvider {
 			PackageManager packageManager = context.getPackageManager();
 			Intent alarmClockIntent = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER);
 			
-	        try {
-	        	// TODO Multi-device compatibility 
-	        	// see http://stackoverflow.com/questions/3590955/intent-to-launch-the-clock-application-on-android
-	        	ComponentName cn = new ComponentName("com.google.android.deskclock", "com.android.deskclock.AlarmClock");
-				packageManager.getActivityInfo(cn, PackageManager.GET_META_DATA);
+			ComponentName cn = null;
+			for (String[] alarmClockImpl : ALARM_CLOCK_IMPL) {
+				try {
+					cn = new ComponentName(alarmClockImpl[ALARM_CLOCK_IMPL_PACKAGE], alarmClockImpl[ALARM_CLOCK_IMPL_CLASS]);
+					packageManager.getActivityInfo(cn, PackageManager.GET_META_DATA);
+				}
+				catch (NameNotFoundException e) {
+					// Try another implementation
+					continue;
+				}
+				Log.d(TAG, String.format("Using %s implementation", alarmClockImpl[ALARM_CLOCK_IMPL_NAME]));
+				break;
+			}
+			if (cn != null) {
 				alarmClockIntent.setComponent(cn);
-				
 				pendingOpenAlarmScreen = PendingIntent.getActivity(context, 0, alarmClockIntent, 0);
 			}
-			catch (NameNotFoundException e) {
-				Log.e(TAG, "Unable to get AlarmClock intent");
+			else {
+				Log.e(TAG, "Unable to find correct AlarmClock implementation on this device");
 			}
 		}
         return pendingOpenAlarmScreen;

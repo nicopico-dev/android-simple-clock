@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="update_interval_ms" type="integer" format="integer">60000</item>
+    <item name="update_interval_ms" type="integer" format="integer">30000</item>
     
 </resources>
