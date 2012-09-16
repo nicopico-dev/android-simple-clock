@@ -11,7 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.SystemClock;
+import android.graphics.Typeface;
 import android.provider.Settings;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -20,27 +20,41 @@ import android.widget.RemoteViews;
 
 public class ClockWidget extends AppWidgetProvider {
 	private static final String TAG = ClockWidget.class.getSimpleName();
-	private AlarmManager alarmManager = null;
-	private PendingIntent pendingRefresh = null;
+	private static AlarmManager alarmManager = null;
+	private static PendingIntent pendingRefresh = null;
+	private static boolean checkedOpenAlarm = false;
+	private static PendingIntent pendingOpenAlarmScreen = null;
 	
 	@Override
 	public void onEnabled(Context context) {
 		super.onEnabled(context);
-		alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-		int update_interval_ms = context.getResources().getInteger(R.integer.update_interval_ms);
 		
-		Intent intent = new Intent(context, ClockWidget.class);
-		intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-		intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, new int[0]);
-		pendingRefresh = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-		
-		alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + update_interval_ms, update_interval_ms, pendingRefresh);
+		if (alarmManager == null) {
+			alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+			int update_interval_ms = context.getResources().getInteger(R.integer.update_interval_ms);
+			
+			Intent intent = new Intent(context, ClockWidget.class);
+			intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+			intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, new int[] {1});	// appWidgetIds must have a size > 1 for onUpdate to be called
+			pendingRefresh = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+			
+			// Set an alarm to run on top of each minute
+			long currentTime = new Date().getTime();
+			long millisToNextTopMinute = 60000 - (currentTime % 60000) + 1000;
+			alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME, millisToNextTopMinute, update_interval_ms, pendingRefresh);
+		}
+	}
+
+	@Override
+	public void onReceive(Context context, Intent intent) {
+		Log.i(TAG, "Received intent " + intent.getAction());
+		super.onReceive(context, intent);
 	}
 
 	@Override
 	public void onDisabled(Context context) {
+		if (alarmManager != null) alarmManager.cancel(pendingRefresh);
 		super.onDisabled(context);
-		alarmManager.cancel(pendingRefresh);
 	}
 	
 	@Override
@@ -78,7 +92,15 @@ public class ClockWidget extends AppWidgetProvider {
 			remoteViews.setOnClickPendingIntent(R.id.widgetClock, onClickIntent);
 		}
 		
-		String dateFormatString = context.getString(R.string.date_format_all);
+		String dateFormatString;
+		if (DateFormat.getDateFormatOrder(context)[0] == DateFormat.DATE) {
+			// General format: day month year
+			dateFormatString = context.getString(R.string.date_format_all);
+		}
+		else {
+			// US Format: month day year
+			dateFormatString = context.getString(R.string.date_format_us);
+		}
 		CharSequence dateString = DateFormat.format(dateFormatString, now);
 		remoteViews.setTextViewText(R.id.txtDate, dateString);
 		
@@ -102,21 +124,26 @@ public class ClockWidget extends AppWidgetProvider {
 	}
 	
 	private PendingIntent getOpenAlarmClockIntent(Context context) {
-		//TODO Add a delayed pending intent to refresh the clock if alarms are changed
-		PackageManager packageManager = context.getPackageManager();
-		Intent alarmClockIntent = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER);
-		
-        try {
-        	ComponentName cn = new ComponentName("com.android.deskclock", "com.android.deskclock.AlarmClock");
-			packageManager.getActivityInfo(cn, PackageManager.GET_META_DATA);
-			alarmClockIntent.setComponent(cn);
+		if (pendingOpenAlarmScreen == null && !checkedOpenAlarm) {
+			//TODO Add a delayed pending intent to refresh the clock if alarms are changed
+			checkedOpenAlarm = true;
+			PackageManager packageManager = context.getPackageManager();
+			Intent alarmClockIntent = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER);
 			
-			PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, alarmClockIntent, 0);
-			return pendingIntent;
+	        try {
+	        	// TODO Multi-device compatibility 
+	        	// see http://stackoverflow.com/questions/3590955/intent-to-launch-the-clock-application-on-android
+	        	ComponentName cn = new ComponentName("com.google.android.deskclock", "com.android.deskclock.AlarmClock");
+				packageManager.getActivityInfo(cn, PackageManager.GET_META_DATA);
+				alarmClockIntent.setComponent(cn);
+				
+				pendingOpenAlarmScreen = PendingIntent.getActivity(context, 0, alarmClockIntent, 0);
+			}
+			catch (NameNotFoundException e) {
+				Log.e(TAG, "Unable to get AlarmClock intent");
+			}
 		}
-		catch (NameNotFoundException e) {
-			Log.e(TAG, "");
-		}
-        return null;
+        return pendingOpenAlarmScreen;
 	}
+
 }

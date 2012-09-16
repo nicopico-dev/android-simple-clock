@@ -19,7 +19,7 @@
         android:paddingLeft="0dp"
         android:paddingRight="0dp"
         android:text="@string/sample_hour"
-        android:textScaleX="1.4" />
+        android:textScaleX="1.0" />
 
     <TextView
         android:id="@+id/txtDate"

@@ -1,9 +1,9 @@
 <resources>
-    <string name="app_name">Digital CLock Widget</string>
+    <string name="app_name">My Ugly Digital Clock</string>
     <string name="sample_hour">23:50</string>
     <string name="sample_date">mardi 4 septembre</string>
     <string name="sample_alarm">mer. 07:15</string>
-    <string name="date_format_all">EEEE d MMMM</string>
-    <string name="date_format_us">EEEE MMMM d</string>
+    <string name="date_format_all">EEE d MMMM</string>
+    <string name="date_format_us">EEE, MMMM d</string>
     <string name="alarmclock_content_description">next alarm</string>
 </resources>
