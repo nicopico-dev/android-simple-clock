@@ -11,6 +11,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Paint.Align;
+import android.graphics.Typeface;
 import android.provider.Settings;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -38,24 +45,14 @@ public class ClockWidget extends AppWidgetProvider {
 	private static boolean checkedOpenAlarm = false;
 	private static PendingIntent pendingOpenAlarmScreen = null;
 	
+	private static Bitmap bitmapBase = null;
+	private static Paint textPaint = null;
+	
 	@Override
 	public void onEnabled(Context context) {
 		super.onEnabled(context);
 		
-		if (alarmManager == null) {
-			alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-			int update_interval_ms = context.getResources().getInteger(R.integer.update_interval_ms);
-			
-			Intent intent = new Intent(context, ClockWidget.class);
-			intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-			intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, new int[] {1});	// appWidgetIds must have a size > 1 for onUpdate to be called
-			pendingRefresh = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-			
-			// Set an alarm to run on top of each minute
-			long currentTime = new Date().getTime();
-			long millisToNextTopMinute = 60000 - (currentTime % 60000) + 1000;
-			alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME, millisToNextTopMinute, update_interval_ms, pendingRefresh);
-		}
+		initialize(context);
 	}
 
 	@Override
@@ -73,28 +70,64 @@ public class ClockWidget extends AppWidgetProvider {
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
 		super.onUpdate(context, appWidgetManager, appWidgetIds);
+		
+		// Static variables might be reset after an upgrade of the widget
+		initialize(context);
+		
 		ComponentName me = new ComponentName(context, ClockWidget.class);
 		appWidgetManager.updateAppWidget(me, buildUpdate(context, appWidgetIds));
 	}
+	
+	private void initialize(Context context) {
+		if (alarmManager == null) {
+			alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+			int update_interval_ms = context.getResources().getInteger(R.integer.update_interval_ms);
+			
+			Intent intent = new Intent(context, ClockWidget.class);
+			intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+			intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, new int[] {1});	// appWidgetIds must have a size > 1 for onUpdate to be called
+			pendingRefresh = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+			
+			// Set an alarm to run on top of each minute
+			long currentTime = new Date().getTime();
+			long millisToNextTopMinute = 60000 - (currentTime % 60000) + 1000;
+			alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME, millisToNextTopMinute, update_interval_ms, pendingRefresh);
+		}
+		
+		if (bitmapBase == null || textPaint == null) {
+			Resources res = context.getResources();
+			bitmapBase = Bitmap.createBitmap(
+					res.getDimensionPixelSize(R.dimen.widget_width), 
+					res.getDimensionPixelSize(R.dimen.widget_height), 
+					Bitmap.Config.ARGB_8888);
+			
+			textPaint = new Paint();
+			textPaint.setColor(Color.WHITE);
+			textPaint.setAntiAlias(true);
+		    textPaint.setSubpixelText(true);
+		    textPaint.setStyle(Paint.Style.FILL);
+		    textPaint.setTextAlign(Align.LEFT);
+		    
+		    Typeface robotoTypeface = Typeface.createFromAsset(context.getAssets(), "fonts/Roboto-Light.ttf");
+		    textPaint.setTypeface(robotoTypeface);
+		    textPaint.setTextSize(res.getDimensionPixelSize(R.dimen.big_text_size));
+		}
+	}
 
 	private RemoteViews buildUpdate(Context context, int[] appWidgetIds) {
-		// Adapt layout if using AM/PM format
 		RemoteViews remoteViews;
-		if (DateFormat.is24HourFormat(context)) {
-			remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout_24);
-		}
-		else {
-			remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout_12);
-		}
+		remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
 		
 		Date now = new Date();
 		
 		java.text.DateFormat timeFormat = DateFormat.getTimeFormat(context);
-		String hourString = timeFormat.format(now);
-		if (hourString.length() == 4) {
-			hourString = "0" + hourString;
+		String hourText = timeFormat.format(now);
+		if (hourText.length() == 4) {
+			hourText = "0" + hourText;
 		}
-		remoteViews.setTextViewText(R.id.txtHour, hourString);
+		//remoteViews.setTextViewText(R.id.txtHour, hourString);
+		Bitmap hourBitmap = getHourBitmap(hourText);
+		remoteViews.setImageViewBitmap(R.id.imgHour, hourBitmap);
 		
 		// Display next alarm if any
 		displayNextAlarm(context, remoteViews, R.id.txtAlarm);
@@ -114,20 +147,28 @@ public class ClockWidget extends AppWidgetProvider {
 			// US Format: month day year
 			dateFormatString = context.getString(R.string.date_format_us);
 		}
-		CharSequence dateString = DateFormat.format(dateFormatString, now);
-		remoteViews.setTextViewText(R.id.txtDate, dateString);
+		CharSequence dateText = DateFormat.format(dateFormatString, now);
+		remoteViews.setTextViewText(R.id.txtDate, dateText);
 		
 		return(remoteViews);
 	}
 	
+	private Bitmap getHourBitmap(String hourText) {
+		Bitmap bitmap = Bitmap.createBitmap(bitmapBase);
+		Canvas canvas = new Canvas(bitmap);
+		canvas.drawText(hourText, 0, canvas.getHeight(), textPaint);
+		
+		return bitmap;
+	}
+
 	private boolean displayNextAlarm(Context context, RemoteViews remoteViews, int textAlarmID) {
-		String nextAlarmString = Settings.System.getString(
+		String nextAlarmText = Settings.System.getString(
 				context.getContentResolver(), 
 				Settings.System.NEXT_ALARM_FORMATTED);
 		
-        if (nextAlarmString.length() > 0) {
+        if (nextAlarmText.length() > 0) {
         	remoteViews.setViewVisibility(R.id.blockAlarm, View.VISIBLE);
-        	remoteViews.setTextViewText(textAlarmID, nextAlarmString);
+        	remoteViews.setTextViewText(textAlarmID, nextAlarmText);
         	return true;
         }
         else {

@@ -11,10 +11,10 @@
     </style>
     
     <style name="TextBig" parent="@style/TextBase">
-        <item name="android:textSize">50sp</item>
+        <item name="android:textSize">@dimen/big_text_size</item>
     </style>
 
     <style name="TextSmall" parent="@style/TextBase">
-        <item name="android:textSize">12sp</item>
+        <item name="android:textSize">@dimen/small_text_size</item>
     </style>
 </resources>
