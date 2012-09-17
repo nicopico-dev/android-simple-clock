@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">My Ugly Digital Clock</string>
+    <string name="app_name">My Digital Clock</string>
     <string name="sample_hour">23</string>
     <string name="sample_date">mardi 4 septembre</string>
     <string name="sample_alarm">mer. 07:15</string>

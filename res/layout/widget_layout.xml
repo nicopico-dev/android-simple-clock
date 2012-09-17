@@ -3,7 +3,6 @@
     android:id="@+id/widgetClock"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#7700FF00"
     android:padding="@dimen/widget_margin" >
 
     <TextView
@@ -13,13 +12,13 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:background="#770000FF"
+        android:layout_marginTop="@dimen/hour_top_margin"
         android:gravity="top|right"
         android:includeFontPadding="false"
         android:lineSpacingExtra="0dp"
+        android:lineSpacingMultiplier="1"
         android:paddingBottom="0dp"
         android:paddingTop="0dp"
-        android:lineSpacingMultiplier="1"
         android:text="@string/sample_hour" />
 
     <ImageView
@@ -28,7 +27,6 @@
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/txtHour"
-        android:background="#77FF0000"
         android:scaleType="centerInside" />
 
     <LinearLayout

@@ -5,6 +5,7 @@
     <dimen name="widget_margin">0dp</dimen>
     
     <dimen name="hour_width">95dp</dimen>
+    <dimen name="hour_top_margin">-5dp</dimen>
     
     <dimen name="bitmap_width">40dp</dimen>
     <dimen name="bitmap_height">80dp</dimen>
