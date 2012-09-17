@@ -62,17 +62,6 @@ public class ClockWidget extends AppWidgetProvider {
 		super.onDisabled(context);
 	}
 	
-	@Override
-	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-		super.onUpdate(context, appWidgetManager, appWidgetIds);
-		
-		// Static variables might be reset after an upgrade of the widget
-		initialize(context);
-		
-		ComponentName me = new ComponentName(context, ClockWidget.class);
-		appWidgetManager.updateAppWidget(me, buildUpdate(context, appWidgetIds));
-	}
-	
 	private void initialize(Context context) {
 		if (alarmManager == null) {
 			alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -88,6 +77,16 @@ public class ClockWidget extends AppWidgetProvider {
 			long millisToNextTopMinute = 60000 - (currentTime % 60000) + 1000;
 			alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME, millisToNextTopMinute, update_interval_ms, pendingRefresh);
 		}
+	}
+	
+	@Override
+	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+		// Static variables might be reset after an upgrade of the widget
+		initialize(context);
+		
+		// Update all widgets at once
+		ComponentName me = new ComponentName(context, ClockWidget.class);
+		appWidgetManager.updateAppWidget(me, buildUpdate(context, appWidgetIds));
 	}
 
 	private RemoteViews buildUpdate(Context context, int[] appWidgetIds) {
@@ -155,12 +154,18 @@ public class ClockWidget extends AppWidgetProvider {
 		minuteBox.top = (bitmapHeight - (4 * minuteHeight + 3 * minuteSep)) / 2;
 		minuteBox.bottom = minuteBox.top + minuteHeight;
 		
-		for (int i = 1; i <= 4; i++) {
+		for (int i = 4; i >= 1; i--) {
 			if (i * 15 <= minute) {
 				paint.setStyle(Paint.Style.FILL_AND_STROKE);
+				paint.setAlpha(255);
+			}
+			else if ((i - 0.5) * 15 <= minute){
+				paint.setStyle(Paint.Style.FILL_AND_STROKE);
+				paint.setAlpha(150);
 			}
 			else {
 				paint.setStyle(Paint.Style.STROKE);
+				paint.setAlpha(255);
 			}
 			
 			canvas.drawRect(minuteBox, paint);

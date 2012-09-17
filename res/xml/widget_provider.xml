@@ -3,5 +3,7 @@
     android:minWidth="@dimen/widget_width"
     android:minHeight="@dimen/widget_height"
 	android:updatePeriodMillis="0"
-	android:initialLayout="@layout/empty_layout" />
+	android:initialLayout="@layout/empty_layout"
+	android:resizeMode="horizontal"
+	android:previewImage="@drawable/widget_preview" />
 <!-- width|height / cell = (70 * N) - 30  -->
