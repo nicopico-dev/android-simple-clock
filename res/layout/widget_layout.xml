@@ -1,51 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widgetClock"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:paddingBottom="0dp" >
-
-    <ImageView
-        android:id="@+id/imgHour"
-        style="@style/TextBig"
-        android:layout_width="@dimen/widget_width"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true" />
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#7700FF00"
+    android:padding="@dimen/widget_margin" >
 
     <TextView
-        android:id="@+id/txtDate"
-        style="@style/TextSmall"
-        android:layout_width="wrap_content"
+        android:id="@+id/txtHour"
+        style="@style/TextBig"
+        android:layout_width="@dimen/hour_width"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@id/imgHour"
-        android:text="@string/sample_date" />
+        android:layout_alignParentTop="true"
+        android:background="#770000FF"
+        android:gravity="top|right"
+        android:includeFontPadding="false"
+        android:lineSpacingExtra="0dp"
+        android:paddingBottom="0dp"
+        android:paddingTop="0dp"
+        android:lineSpacingMultiplier="1"
+        android:text="@string/sample_hour" />
+
+    <ImageView
+        android:id="@+id/imgMinute"
+        android:layout_width="@dimen/bitmap_width"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/txtHour"
+        android:background="#77FF0000"
+        android:scaleType="centerInside" />
 
     <LinearLayout
-        android:id="@+id/blockAlarm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignRight="@id/imgHour"
-        android:layout_below="@id/imgHour"
-        android:orientation="horizontal" >
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginRight="2dp"
-            android:adjustViewBounds="true"
-            android:contentDescription="@string/alarmclock_content_description"
-            android:scaleType="fitCenter"
-            android:src="@android:drawable/ic_lock_idle_alarm" />
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@+id/imgMinute"
+        android:orientation="vertical" >
 
         <TextView
-            android:id="@+id/txtAlarm"
+            android:id="@+id/txtDate"
             style="@style/TextSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/sample_alarm" />
+            android:text="@string/sample_date" />
+
+        <LinearLayout
+            android:id="@+id/blockAlarm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/txtDate"
+            android:layout_below="@id/txtDate"
+            android:orientation="horizontal" >
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginRight="2dp"
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/alarmclock_content_description"
+                android:scaleType="fitCenter"
+                android:src="@android:drawable/ic_lock_idle_alarm" />
+
+            <TextView
+                android:id="@+id/txtAlarm"
+                style="@style/TextSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sample_alarm" />
+        </LinearLayout>
     </LinearLayout>
 
 </RelativeLayout>

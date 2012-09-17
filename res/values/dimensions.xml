@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="widget_width">180dp</dimen>
-    <dimen name="widget_height">40dp</dimen>
-    <dimen name="big_text_size">50sp</dimen>
-    <dimen name="small_text_size">12sp</dimen>
+    <dimen name="widget_height">56dp</dimen>
+    <dimen name="widget_margin">0dp</dimen>
+    
+    <dimen name="hour_width">95dp</dimen>
+    
+    <dimen name="bitmap_width">40dp</dimen>
+    <dimen name="bitmap_height">80dp</dimen>
+    <dimen name="bitmap_minute_width">25dp</dimen>
+    <dimen name="bitmap_minute_height">10dp</dimen>
+    <dimen name="bitmap_minute_sep">7dp</dimen>
+    
+    <dimen name="big_text_size">80sp</dimen>
+    <dimen name="small_text_size">14sp</dimen>
 </resources>

@@ -1,5 +1,6 @@
 package fr.nicopico.simpleclockwidget;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import android.app.AlarmManager;
@@ -16,18 +17,16 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Paint.Align;
-import android.graphics.Typeface;
+import android.graphics.Rect;
 import android.provider.Settings;
 import android.text.format.DateFormat;
 import android.util.Log;
-import android.view.View;
 import android.widget.RemoteViews;
 
 public class ClockWidget extends AppWidgetProvider {
 	private static final String TAG = ClockWidget.class.getSimpleName();
 	
-	// AlarmClock component change depending on the implementation
+	// AlarmClock component package depending on the implementation
 	// see http://stackoverflow.com/questions/3590955/intent-to-launch-the-clock-application-on-android
 	private static final String[][] ALARM_CLOCK_IMPL = {
 		{"Standard Alarm Clock", "com.android.deskclock", "com.android.deskclock.AlarmClock"},
@@ -45,19 +44,15 @@ public class ClockWidget extends AppWidgetProvider {
 	private static boolean checkedOpenAlarm = false;
 	private static PendingIntent pendingOpenAlarmScreen = null;
 	
-	private static Bitmap bitmapBase = null;
-	private static Paint textPaint = null;
-	
 	@Override
 	public void onEnabled(Context context) {
 		super.onEnabled(context);
-		
 		initialize(context);
 	}
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		Log.i(TAG, "Received intent " + intent.getAction());
+		//Log.i(TAG, "Received intent " + intent.getAction());
 		super.onReceive(context, intent);
 	}
 
@@ -93,41 +88,39 @@ public class ClockWidget extends AppWidgetProvider {
 			long millisToNextTopMinute = 60000 - (currentTime % 60000) + 1000;
 			alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME, millisToNextTopMinute, update_interval_ms, pendingRefresh);
 		}
-		
-		if (bitmapBase == null || textPaint == null) {
-			Resources res = context.getResources();
-			bitmapBase = Bitmap.createBitmap(
-					res.getDimensionPixelSize(R.dimen.widget_width), 
-					res.getDimensionPixelSize(R.dimen.widget_height), 
-					Bitmap.Config.ARGB_8888);
-			
-			textPaint = new Paint();
-			textPaint.setColor(Color.WHITE);
-			textPaint.setAntiAlias(true);
-		    textPaint.setSubpixelText(true);
-		    textPaint.setStyle(Paint.Style.FILL);
-		    textPaint.setTextAlign(Align.LEFT);
-		    
-		    Typeface robotoTypeface = Typeface.createFromAsset(context.getAssets(), "fonts/Roboto-Light.ttf");
-		    textPaint.setTypeface(robotoTypeface);
-		    textPaint.setTextSize(res.getDimensionPixelSize(R.dimen.big_text_size));
-		}
 	}
 
 	private RemoteViews buildUpdate(Context context, int[] appWidgetIds) {
 		RemoteViews remoteViews;
 		remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
 		
-		Date now = new Date();
-		
-		java.text.DateFormat timeFormat = DateFormat.getTimeFormat(context);
-		String hourText = timeFormat.format(now);
-		if (hourText.length() == 4) {
-			hourText = "0" + hourText;
+		// Hour
+		int hour;
+		if (DateFormat.is24HourFormat(context)) {
+			hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
 		}
-		//remoteViews.setTextViewText(R.id.txtHour, hourString);
-		Bitmap hourBitmap = getHourBitmap(hourText);
-		remoteViews.setImageViewBitmap(R.id.imgHour, hourBitmap);
+		else {
+			hour = Calendar.getInstance().get(Calendar.HOUR);
+		}
+		remoteViews.setTextViewText(R.id.txtHour, String.valueOf(hour));
+		
+		// Minute
+		int minute = Calendar.getInstance().get(Calendar.MINUTE);
+		remoteViews.setImageViewBitmap(R.id.imgMinute, getMinuteBitmap(context, minute));
+		
+		// Date
+		String dateFormatString;
+		if (DateFormat.getDateFormatOrder(context)[0] == DateFormat.DATE) {
+			// General format: day month year
+			dateFormatString = context.getString(R.string.date_format_all);
+		}
+		else {
+			// US Format: month day year
+			dateFormatString = context.getString(R.string.date_format_us);
+		}
+		Date now = new Date();
+		CharSequence dateText = DateFormat.format(dateFormatString, now);
+		remoteViews.setTextViewText(R.id.txtDate, dateText);
 		
 		// Display next alarm if any
 		displayNextAlarm(context, remoteViews, R.id.txtAlarm);
@@ -138,26 +131,42 @@ public class ClockWidget extends AppWidgetProvider {
 			remoteViews.setOnClickPendingIntent(R.id.widgetClock, onClickIntent);
 		}
 		
-		String dateFormatString;
-		if (DateFormat.getDateFormatOrder(context)[0] == DateFormat.DATE) {
-			// General format: day month year
-			dateFormatString = context.getString(R.string.date_format_all);
-		}
-		else {
-			// US Format: month day year
-			dateFormatString = context.getString(R.string.date_format_us);
-		}
-		CharSequence dateText = DateFormat.format(dateFormatString, now);
-		remoteViews.setTextViewText(R.id.txtDate, dateText);
-		
 		return(remoteViews);
 	}
 	
-	private Bitmap getHourBitmap(String hourText) {
-		Bitmap bitmap = Bitmap.createBitmap(bitmapBase);
-		Canvas canvas = new Canvas(bitmap);
-		canvas.drawText(hourText, 0, canvas.getHeight(), textPaint);
+	private Bitmap getMinuteBitmap(Context context, int minute) {
+		Resources res = context.getResources();
+		int bitmapWidth = res.getDimensionPixelSize(R.dimen.bitmap_width);
+		int bitmapHeight = res.getDimensionPixelSize(R.dimen.bitmap_height);
+		int minuteWidth = res.getDimensionPixelSize(R.dimen.bitmap_minute_width);
+		int minuteHeight = res.getDimensionPixelSize(R.dimen.bitmap_minute_height);
+		int minuteSep = res.getDimensionPixelSize(R.dimen.bitmap_minute_sep);
 		
+		Bitmap bitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
+		Canvas canvas = new Canvas(bitmap);
+		
+		Paint paint = new Paint();
+		paint.setColor(Color.WHITE);
+		paint.setAntiAlias(true);
+		
+		Rect minuteBox = new Rect();
+		minuteBox.left = (bitmapWidth - minuteWidth) / 2;
+		minuteBox.right = minuteBox.left + minuteWidth;
+		minuteBox.top = (bitmapHeight - (4 * minuteHeight + 3 * minuteSep)) / 2;
+		minuteBox.bottom = minuteBox.top + minuteHeight;
+		
+		for (int i = 1; i <= 4; i++) {
+			if (i * 15 <= minute) {
+				paint.setStyle(Paint.Style.FILL_AND_STROKE);
+			}
+			else {
+				paint.setStyle(Paint.Style.STROKE);
+			}
+			
+			canvas.drawRect(minuteBox, paint);
+			minuteBox.top += minuteHeight + minuteSep;
+			minuteBox.bottom += minuteHeight + minuteSep;
+		}
 		return bitmap;
 	}
 
@@ -167,12 +176,12 @@ public class ClockWidget extends AppWidgetProvider {
 				Settings.System.NEXT_ALARM_FORMATTED);
 		
         if (nextAlarmText.length() > 0) {
-        	remoteViews.setViewVisibility(R.id.blockAlarm, View.VISIBLE);
         	remoteViews.setTextViewText(textAlarmID, nextAlarmText);
         	return true;
         }
         else {
-        	remoteViews.setViewVisibility(R.id.blockAlarm, View.INVISIBLE);
+        	//remoteViews.setViewVisibility(R.id.blockAlarm, View.INVISIBLE);
+        	remoteViews.removeAllViews(R.id.blockAlarm);
         	return false;
         }
 	}
