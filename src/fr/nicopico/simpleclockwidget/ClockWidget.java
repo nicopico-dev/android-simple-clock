@@ -47,23 +47,32 @@ public class ClockWidget extends AppWidgetProvider {
 	@Override
 	public void onEnabled(Context context) {
 		super.onEnabled(context);
-		initialize(context);
+		startAutomaticRefresh(context);
 	}
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		//Log.i(TAG, "Received intent " + intent.getAction());
+		Log.d(TAG, "Received intent " + intent.getAction());
 		super.onReceive(context, intent);
 	}
 
 	@Override
 	public void onDisabled(Context context) {
+		Log.d(TAG, "Disable pending refresh");
 		if (alarmManager != null) alarmManager.cancel(pendingRefresh);
+		
+		// Release everything
+		alarmManager = null;
+		pendingRefresh = null;
+		checkedOpenAlarm = false;
+		pendingOpenAlarmScreen = null;
+		
 		super.onDisabled(context);
 	}
 	
-	private void initialize(Context context) {
+	private void startAutomaticRefresh(Context context) {
 		if (alarmManager == null) {
+			Log.d(TAG, "Initialize alarm manager");
 			alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 			int update_interval_ms = context.getResources().getInteger(R.integer.update_interval_ms);
 			
@@ -82,7 +91,7 @@ public class ClockWidget extends AppWidgetProvider {
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
 		// Static variables might be reset after an upgrade of the widget
-		initialize(context);
+		startAutomaticRefresh(context);
 		
 		// Update all widgets at once
 		ComponentName me = new ComponentName(context, ClockWidget.class);
