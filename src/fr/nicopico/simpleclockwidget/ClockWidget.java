@@ -59,12 +59,7 @@ public class ClockWidget extends AppWidgetProvider {
 				Intent.ACTION_TIME_CHANGED.equals(intent.getAction())
 				|| Intent.ACTION_USER_PRESENT.equals(intent.getAction())
 				)) {
-			try {
-				pendingRefresh.send();
-			} 
-			catch (CanceledException e) {
-				Log.w(TAG, "explicit pendingRefresh refused");
-			}
+			forceRefresh();
 		}
 		super.onReceive(context, intent);
 	}
@@ -243,6 +238,15 @@ public class ClockWidget extends AppWidgetProvider {
 			}
 		}
         return pendingOpenAlarmScreen;
+	}
+	
+	private void forceRefresh() {
+		try {
+			pendingRefresh.send();
+		} 
+		catch (CanceledException e) {
+			Log.w(TAG, "explicit pendingRefresh refused");
+		}
 	}
 
 }
