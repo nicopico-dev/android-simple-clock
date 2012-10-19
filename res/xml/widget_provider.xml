@@ -7,4 +7,3 @@
 	android:initialLayout="@layout/empty_layout"
 	android:resizeMode="horizontal"
 	android:previewImage="@drawable/widget_preview" />
-<!-- width|height / cell = (70 * N) - 30  -->

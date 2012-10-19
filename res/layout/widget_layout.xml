@@ -3,7 +3,8 @@
     android:id="@+id/widgetClock"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="@dimen/widget_margin" >
+    android:padding="@dimen/widget_margin"
+    background="#7700FF00" >
 
     <TextView
         android:id="@+id/txtHour"

@@ -5,6 +5,7 @@ import java.util.Date;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.app.PendingIntent.CanceledException;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
@@ -53,6 +54,18 @@ public class ClockWidget extends AppWidgetProvider {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		Log.d(TAG, "Received intent " + intent.getAction());
+		
+		if (pendingRefresh != null && ( 
+				Intent.ACTION_TIME_CHANGED.equals(intent.getAction())
+				|| Intent.ACTION_USER_PRESENT.equals(intent.getAction())
+				)) {
+			try {
+				pendingRefresh.send();
+			} 
+			catch (CanceledException e) {
+				Log.w(TAG, "explicit pendingRefresh refused");
+			}
+		}
 		super.onReceive(context, intent);
 	}
 
@@ -155,6 +168,7 @@ public class ClockWidget extends AppWidgetProvider {
 		
 		Paint paint = new Paint();
 		paint.setColor(Color.WHITE);
+		paint.setStrokeWidth(0);
 		paint.setAntiAlias(true);
 		
 		Rect minuteBox = new Rect();
