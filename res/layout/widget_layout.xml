@@ -60,7 +60,7 @@
                 android:adjustViewBounds="true"
                 android:contentDescription="@string/alarmclock_content_description"
                 android:scaleType="fitCenter"
-                android:src="@android:drawable/ic_lock_idle_alarm" />
+                android:src="@drawable/ic_lock_idle_alarm" />
 
             <TextView
                 android:id="@+id/txtAlarm"
