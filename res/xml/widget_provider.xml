@@ -6,4 +6,5 @@
     android:updatePeriodMillis="0"
 	android:initialLayout="@layout/initial_layout"
 	android:resizeMode="horizontal"
-	android:previewImage="@drawable/widget_preview" />
+	android:previewImage="@drawable/widget_preview"
+    android:widgetCategory="keyguard|home_screen" />

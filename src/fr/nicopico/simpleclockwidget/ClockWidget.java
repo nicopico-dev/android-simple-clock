@@ -169,7 +169,7 @@ public class ClockWidget extends AppWidgetProvider {
 		Rect minuteBox = new Rect();
 		minuteBox.left = (bitmapWidth - minuteWidth) / 2;
 		minuteBox.right = minuteBox.left + minuteWidth;
-		minuteBox.top = (bitmapHeight - (4 * minuteHeight + 3 * minuteSep)) / 2;
+		minuteBox.top = (bitmapHeight - (4 * minuteHeight + (int) (3.5 * minuteSep))) / 2;
 		minuteBox.bottom = minuteBox.top + minuteHeight;
 		
 		for (int i = 4; i >= 1; i--) {

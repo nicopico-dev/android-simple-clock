@@ -3,18 +3,17 @@
     android:id="@+id/widgetClock"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="@dimen/widget_margin"
-    background="#7700FF00" >
+    android:padding="@dimen/widget_margin">
 
     <TextView
         android:id="@+id/txtHour"
         style="@style/TextBig"
         android:layout_width="@dimen/hour_width"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_marginTop="@dimen/hour_top_margin"
-        android:gravity="top|right"
+        android:gravity="center_vertical|right"
         android:includeFontPadding="false"
         android:lineSpacingExtra="0dp"
         android:lineSpacingMultiplier="1"
@@ -28,7 +27,8 @@
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/txtHour"
-        android:scaleType="centerInside" />
+        android:scaleType="centerInside"
+        android:contentDescription="@string/minutes_description" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -48,8 +48,6 @@
             android:id="@+id/blockAlarm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/txtDate"
-            android:layout_below="@id/txtDate"
             android:orientation="horizontal" >
 
             <ImageView
