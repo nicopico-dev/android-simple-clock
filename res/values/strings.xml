@@ -8,4 +8,6 @@
     <string name="date_format_full_all">EEE d MMMM</string>
     <string name="date_format_full_us">EEE, MMMM d</string>
     <string name="alarmclock_content_description">next alarm</string>
+    <string name="minutes_description">minutes visualization</string>
+    <string name="please_wait">Please wait…</string>
 </resources>
