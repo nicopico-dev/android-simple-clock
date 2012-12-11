@@ -5,7 +5,7 @@
 
     <uses-sdk
         android:minSdkVersion="10"
-        android:targetSdkVersion="16" />
+        android:targetSdkVersion="17" />
     <supports-screens android:xlargeScreens="false"/>
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
 
